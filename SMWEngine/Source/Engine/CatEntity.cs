@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace SMWEngine.Source
 {
-    public abstract class Entity : Basic
+    public abstract class CatEntity : CatSprite
     {
         // Depth mgmt
         public float depth = 0;
@@ -16,31 +16,15 @@ namespace SMWEngine.Source
         public Vector2 position = new Vector2();
         public Vector2 positionLast = new Vector2();
 
-
-        // Sprite & Animation
-        public Texture2D texture;
-        public float alpha = 1;
-        public float curImage;
-        public float imgSpeed;
-        public string curAnim = "idle";
-        public Dictionary<string, List<dynamic>> animList;
-        public SpriteEffects flipX = SpriteEffects.None;
-
-        // Mask information
-        protected int maskHeight = 32;
-        protected int maskWidth = 32;
-
         // ACTUAL PLACES YOU SHOULD CLIP! THE TOP INFORMATION IS THE SIZE OF THE TEXTURE CUT-OUT YOU ARE USING
         protected int leftClip = 0;
         protected int rightClip = 0;
         protected int topClip = 0;
+
         // Quick accessor for bounding box of object
         public Rectangle boundingBox
         {
-            get
-            {
-                return new Rectangle((int) position.X + leftClip, (int) position.Y + topClip, maskWidth - rightClip - leftClip, maskHeight - topClip);
-            }
+            get => new Rectangle((int) position.X + leftClip, (int) position.Y + topClip, spriteWidth - rightClip - leftClip, spriteHeight - topClip);
         }
 
         #region Variables not to modify
@@ -60,18 +44,12 @@ namespace SMWEngine.Source
         public abstract void Draw();
         public abstract void HandleInteractions();
 
-        public void UpdateAnimations()
+        /**
+         * Destroy object (Level Remove wrapper)
+         * */
+        public void Destroy()
         {
-            // Update the current image by the image speed
-            curImage += imgSpeed;
-
-            // If the current image is above the animation number, go downwards by the list amount
-            if (animList != null)
-                while (curImage >= animList[curAnim].Count)
-                    curImage -= animList[curAnim].Count;
-
-            // Remember last position
-            positionLast = position;
+            Level.Remove(this);
         }
 
         /**
@@ -166,7 +144,7 @@ namespace SMWEngine.Source
                             && (boundingBox.Bottom-6 < sPosition))
                             {
                                 foundSlope = true;
-                                position.Y = sPosition - maskHeight;
+                                position.Y = sPosition - spriteHeight;
                                 velocity.Y = 0;
                                 speed.Y = 0;
                                 isGrounded = true;
@@ -215,7 +193,7 @@ namespace SMWEngine.Source
                             && (boundingBox.Right + speed.X >= tileWorldPosition.Left)
                             && (boundingBox.Left + speed.X <= tileWorldPosition.Right))
                             {
-                                position.Y = tileWorldPosition.Top - maskHeight;
+                                position.Y = tileWorldPosition.Top - spriteHeight;
                                 velocity.Y = 0;
                                 speed.Y = 0;
                                 isGrounded = true;
@@ -247,7 +225,7 @@ namespace SMWEngine.Source
                             && (boundingBox.Bottom > tileWorldPosition.Top + 4)
                             && (boundingBox.Top < tileWorldPosition.Bottom + speed.Y))
                             {
-                                position.X = tileWorldPosition.Left - maskWidth + rightClip;
+                                position.X = tileWorldPosition.Left - spriteWidth + rightClip;
                                 velocity.X = 0;
                                 speed.X = 0;
                                 atWall = true;

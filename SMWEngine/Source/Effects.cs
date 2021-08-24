@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace SMWEngine.Source
 {
-    public abstract class Effect : Entity
+    public abstract class Effect : CatEntity
     {
 
     }
@@ -15,20 +15,20 @@ namespace SMWEngine.Source
 
         public Impact()
         {
-            animList = new Dictionary<string, List<dynamic>>
+            animList = new Dictionary<string, List<double>>
             {
-                ["impact"] = new List<dynamic> { 0, 1, 0, 1 },
+                ["impact"] = new List<double> { 0, 1, 0, 1 },
             };
             curAnim = "impact";
-            texture = Level.Load("Effects/Impact");
+            texture = SMW.Load("Effects/Impact");
             imgSpeed = 0.5f;
-            maskHeight = maskWidth = 16;
+            spriteHeight = spriteWidth = 16;
             depth = -2;
         }
 
         public override void Draw()
         {
-            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, new Rectangle(new Point((int)animList[curAnim][(int)Math.Floor((float)Math.Abs((int)Math.Floor(curImage)))] * maskWidth, 0), new Point(maskWidth, maskHeight)), SpriteEffects.None);
+            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, SpriteEffects.None, spriteCutOut);
         }
 
         public override void EarlyUpdate()
@@ -60,23 +60,23 @@ namespace SMWEngine.Source
         public SkidSmoke(Vector2 position) => Create(position);
         private void Create(Vector2 position)
         {
-            animList = new Dictionary<string, List<dynamic>>
+            animList = new Dictionary<string, List<double>>
             {
-                ["smoke"] = new List<dynamic> { 0, 1, 2 },
+                ["smoke"] = new List<double> { 0, 1, 2 },
             };
-            texture = Level.Load("Effects/Skid");
+            texture = SMW.Load("Effects/Skid");
             curAnim = "smoke";
-            maskHeight = maskWidth = 8;
+            spriteHeight = spriteWidth = 8;
             imgSpeed = 0.25f;
             this.position = position;
         }
 
         public override void Draw()
         {
-            var posRect = new Rectangle((int)position.X, (int)position.Y, maskWidth, maskHeight);
+            var posRect = new Rectangle((int)position.X, (int)position.Y, spriteWidth, spriteHeight);
             var imgIndexReal = (int)Math.Floor(curImage);
-            var cutOutRect = new Rectangle(imgIndexReal * maskWidth, 0, maskWidth, maskHeight);
-            level.spriteBatch.Draw(texture, posRect, cutOutRect, Color.White);
+            var cutOutRect = new Rectangle(imgIndexReal * spriteWidth, 0, spriteWidth, spriteHeight);
+            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, flipX, cutOutRect);
         }
 
         public override void Update()
@@ -105,24 +105,26 @@ namespace SMWEngine.Source
 
     public class Star : Effect
     {
-        private float distOut = 0;
+        private CatTimer timer;
+
         public Star()
         {
-            texture = Level.Load("Effects/Star");
-            new Timer().Start(15, delegate()
+            texture = SMW.Load("Effects/Star");
+            timer = new CatTimer().Start(15, delegate()
             {
-                Level.Remove(this);
+                Destroy();
             });
         }
 
         public override void Draw()
         {
-            var xTensity = 1.5f;
-            var yTensity = 0.75f;
-            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), null, SpriteEffects.None);
-            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), null, SpriteEffects.None);
-            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), null, SpriteEffects.None);
-            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), null, SpriteEffects.None);
+            var xTensity = 2.25f;
+            var yTensity = 1.125f;
+            var distOut = Math.Clamp(timer.elapsedTime, 0, 10);
+            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
+            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
+            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
+            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
         }
 
         public override void EarlyUpdate()
@@ -142,8 +144,6 @@ namespace SMWEngine.Source
 
         public override void Update()
         {
-            if (distOut < 15)
-                distOut += 1.5f;
         }
     }
 
@@ -153,11 +153,11 @@ namespace SMWEngine.Source
         public Smoke()
         {
             depth = 1;
-            maskHeight = maskWidth = 16;
-            texture = Level.Load("Effects/SpinSmoke");
-            animList = new Dictionary<string, List<dynamic>>
+            spriteHeight = spriteWidth = 16;
+            texture = SMW.Load("Effects/SpinSmoke");
+            animList = new Dictionary<string, List<double>>
             {
-                ["smoke"] = new List<dynamic> { 0, 0, 1, 1, 2, 3, 4 },
+                ["smoke"] = new List<double> { 0, 0, 1, 1, 2, 3, 4 },
             };
             curAnim = "smoke";
             imgSpeed = 0.25f;
@@ -166,10 +166,7 @@ namespace SMWEngine.Source
 
         public override void Draw()
         {
-            var posRect = new Rectangle((int) position.X, (int) position.Y, maskWidth, maskHeight);
-            var imgIndexReal = (int) Math.Floor(curImage);
-            var cutOutRect = new Rectangle(imgIndexReal * maskWidth, 0, maskWidth, maskHeight);
-            level.spriteBatch.Draw(texture, posRect, cutOutRect, Color.White);
+            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, flipX, spriteCutOut);
         }
 
         public override void EarlyUpdate()

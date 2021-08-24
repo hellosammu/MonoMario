@@ -4,21 +4,21 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace SMWEngine.Source
 {
-    public class HUD : Basic
+    public class HUD : CatSprite
     {
         private Texture2D reserveSprite;
         private Texture2D timeSprite;
 
         public HUD()
         {
-            reserveSprite = Level.Load("HUD/Reserve");
-            timeSprite = Level.Load("HUD/Time");
+            reserveSprite = SMW.Load("HUD/Reserve");
+            timeSprite = SMW.Load("HUD/Time");
         }
 
         public void Draw()
         {
-            DrawSprite(reserveSprite, 128, 24, new Vector2(0.5f, 0.5f), null, SpriteEffects.None);
-            DrawSprite(timeSprite, 152, 15, Vector2.Zero, null, SpriteEffects.None);
+            DrawSprite(reserveSprite, 128-16, 24-16, new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
+            DrawSprite(timeSprite, 152, 15, Vector2.Zero, SpriteEffects.None, Rectangle.Empty);
         }
 
     }

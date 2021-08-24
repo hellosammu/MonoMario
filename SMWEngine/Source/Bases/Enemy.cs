@@ -6,27 +6,28 @@ using MonoGame.Extended;
 
 namespace SMWEngine.Source
 {
-    public class Enemy : Entity
+    public class Enemy : CatEntity
     {
         public bool isAlive = true;
+        public bool isHittable = true;
 
         public Enemy(Vector2 position)
         {
             depth = 0;
             this.position = position;
-            animList = new Dictionary<string, List<dynamic>> {
-
-                ["walk"] = new List<dynamic>{0, 1},
-
+            animList = new Dictionary<string, List<double>>
+            {
+                ["walk"] = new List<double> {0, 1},
             };
             curAnim = "walk";
             speed.X = 0.5f;
-            maskHeight = 16;
-            maskWidth = 16;
+            spriteHeight = 16;
+            spriteWidth = 16;
             topClip = 4;
             rightClip = 2;
             leftClip = 2;
-            texture = Level.Load("Entities/Goomba");
+            texture = SMW.Load("Entities/Goomba");
+            imgSpeed = 0.125f;
         }
 
         public override void EarlyUpdate()
@@ -38,7 +39,6 @@ namespace SMWEngine.Source
         {
             HandleInteractions();
             var myBB = boundingBox;
-            imgSpeed = Math.Abs(speed.X / 4f);
             velocity.Y = 0.1875f;
             speed += velocity;
             if (speed.Y > 4)
@@ -63,7 +63,7 @@ namespace SMWEngine.Source
         public override void HandleInteractions()
         {
             var entities = level.entities;
-            entities.ForEach(delegate(Entity other)
+            entities.ForEach(delegate(CatEntity other)
             {
                 if (other is Enemy)
                 {
@@ -108,29 +108,56 @@ namespace SMWEngine.Source
         public override void Draw()
         {
             var isFlipped = flipX;
-            var positionRect = new Rectangle(new Point((int)Math.Floor(position.X), (int)Math.Floor(position.Y + 1)), new Point(maskWidth, maskHeight));
-            var cutOut = new Rectangle(new Point((int)animList[curAnim][(int)Math.Floor((float)Math.Abs((int)Math.Floor(curImage)))] * maskWidth, 0), new Point(maskWidth, maskHeight));
 
             if (animList[curAnim][Math.Abs((int)Math.Floor(curImage))] != Math.Floor((float)animList[curAnim][Math.Abs((int)Math.Floor(curImage))]))
                 isFlipped = (flipX == SpriteEffects.FlipHorizontally) ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
 
-            level.spriteBatch.Draw(texture, positionRect, cutOut, Color.White, 0f, Vector2.Zero, isFlipped, 0);
+            DrawSprite(texture, position.X, position.Y+1, new Vector2(0.5f, 0.5f), isFlipped, spriteCutOut);
         }
 
-        internal void OnHit(Player player)
+        public virtual void OnHit(Player player)
         {
-            Level.Remove(this);
+            if (!isHittable)
+                return;
+
+            isHittable = false;
             if (!player.isSpinning)
-                player.speed.Y = -5.5f;
+            {
+                OnJump(player);
+            }
             else
             {
-                player.speed.Y = -0.925f;
-                var smoke = new Smoke() { position = position };
-                Level.Add(smoke);
+                OnSpin(player);
             }
-            player.isJumping = false;
-            var impact = new Impact() { position = new Vector2(player.boundingBox.Center.X - 8, player.boundingBox.Bottom - 16) };
-            Level.Add(impact);
+            new CatTimer().Start(8, () => isHittable = true);
         }
+
+        public virtual void OnJump(Player player)
+        {
+            player.speed.Y = -5.5f;
+            player.isJumping = false;
+            Level.Add(new Impact()
+            {
+                position = new Vector2(player.boundingBox.Center.X - 8, player.boundingBox.Bottom - 16)
+            });
+            Level.Remove(this);
+
+        }
+
+        public virtual void OnSpin(Player player)
+        {
+            player.speed.Y = -0.925f;
+            Level.Add(new Smoke()
+            {
+                position = position
+            });
+            player.isJumping = false;
+            Level.Add(new Impact()
+            {
+                position = new Vector2(player.boundingBox.Center.X - 8, player.boundingBox.Bottom - 16)
+            });
+            Level.Remove(this);
+        }
+
     }
 }

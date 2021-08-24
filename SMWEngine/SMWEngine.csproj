@@ -21,7 +21,8 @@
     <None Remove="Assets\Misc. Content\obj\" />
     <None Remove="Assets\Misc. Content\Assets.mgcb" />
     <None Remove="Assets\MiscContent.mgcb" />
-    <None Remove="FontStashSharp.MonoGame" />
+    <None Remove="Source\Engine\" />
+    <None Remove="Source\Bases\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icon.ico" />
@@ -38,10 +39,11 @@
     <PackageReference Include="MonoGame.Content.Builder.Task" Version="3.8.0.1641" />
     <PackageReference Include="MonoGame.Extended.Graphics" Version="3.8.0" />
     <PackageReference Include="MonoGame.Extended.Input" Version="3.8.0" />
-    <PackageReference Include="FontStashSharp.MonoGame" Version="1.0.3" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Source\" />
+    <Folder Include="Source\Engine\" />
+    <Folder Include="Source\Bases\" />
   </ItemGroup>
   <ItemGroup>
     <None Update="Assets\Levels\Level.hs">

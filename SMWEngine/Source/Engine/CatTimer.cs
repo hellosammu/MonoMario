@@ -6,13 +6,11 @@ namespace SMWEngine.Source
 {
     /**
      * Although created by me, this Timer class is HEAVILY
-     * inspired by the way that the Flixel library. It can
+     * inspired by the way that the Flixel timer works. It can
      * do nearly everything that that timer system does.
      */
-    public class Timer
+    public class CatTimer
     {
-        // All timers
-        public static List<Timer> timers = new List<Timer>();
 
         // Visible non-setter time left
         public float timeLeft { get => _timeLeft; }
@@ -36,40 +34,51 @@ namespace SMWEngine.Source
         // If the timer is paused or not
         public bool active { get; set; } = false;
 
-        // Visible start delay
-        /*public float startDelay
-        {
-            get
-            {
-                return _startDelay;
-            }
-            set
-            {
-                _startDelay = value;
-                startDelayCounter = value;
-            }
-        }*/
-        // Starting delay time
-        //private float _startDelay = 0;
-
-        // Start delay counter
-        //private float startDelayCounter = 0;
-        public bool started = false;
-
+        public delegate void Del();
         public Del onComplete;
-        //public Del onStart;
         public Del onUpdate;
 
-        public Timer()
+        /**
+         * Nullify the timer
+         */
+        public void Cancel()
         {
-
+            if (CatTimer.timers.Contains(this))
+                CatTimer.timers.Remove(this);
+            finished = true;
+            active = false;
         }
 
-        public Timer Start(float time) => Start(time, null, 1);
-        public Timer Start(float time, Del onComplete) => Start(time, onComplete, 1);
-        public Timer Start(float time, int loops) => Start(time, null, loops);
-        public Timer Start(float time, Del onComplete, int loops = 1)
+        /**
+         * Simple pause wrappers, not necessary (can just use active)
+         */
+        public void Pause() => active = false;
+        public void Resume() => active = true;
+
+        /**
+         * Easy way to reset the timer mid-way before finishing
+         */
+        public CatTimer Reset() => Reset(0);
+        public CatTimer Reset(float time)
         {
+
+            // If the time given is more than 0, feed the new time in
+            if (time > 0)
+                this.time = time;
+
+            // Start a new timer
+            Start(this.time, onComplete, loops);
+
+            // Return this timer object
+            return this;
+        }
+
+        public CatTimer Start(float time) => Start(time, null, 1);
+        public CatTimer Start(float time, Del onComplete) => Start(time, onComplete, 1);
+        public CatTimer Start(float time, int loops) => Start(time, null, loops);
+        public CatTimer Start(float time, Del onComplete, int loops = 1)
+        {
+            // Add object to timers
             if (!timers.Contains(this))
             {
                 timers.Add(this);
@@ -86,12 +95,12 @@ namespace SMWEngine.Source
             return this;
         }
 
-        public delegate void Del();
-
+        // Global timer stuff
+        public static List<CatTimer> timers = new List<CatTimer>();
         public static void Update()
         {
             // Iterate through each timer
-            timers.ToList().ForEach(delegate (Timer timer)
+            timers.ToList().ForEach(delegate (CatTimer timer)
             {
                 // Don't do anything if the timer is paused
                 if (!timer.active)
@@ -119,7 +128,7 @@ namespace SMWEngine.Source
                     if (timer.loops > 0)
                     {
                         // If loops are left, subtract from them
-                        if (timer.loopsLeft > 0)
+                        if (timer.loopsLeft > 1)
                         {
                             timer.loopsLeft--;
                             timer._timeLeft = timer.time;
@@ -130,6 +139,10 @@ namespace SMWEngine.Source
                             timers.Remove(timer);
                             timer.active = false;
                         }
+                    }
+                    else
+                    {
+                        timer.Start(timer.time, timer.onComplete, timer.loops);
                     }
                 }
             });

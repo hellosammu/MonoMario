@@ -8,7 +8,7 @@ using MonoGame.Extended.Input;
 
 namespace SMWEngine.Source
 {
-    public class Player : Entity
+    public class Player : CatEntity
     {
         public Vector2 lastSpeed;
         public Microsoft.Xna.Framework.Graphics.Effect paletteSwap;
@@ -37,29 +37,29 @@ namespace SMWEngine.Source
             this.position = position;
             this.velocity.Y = 0.1875f;
             curAnim = "idle";
-            animList = new Dictionary<string, List<dynamic>>
+            animList = new Dictionary<string, List<double>>
             {
-                ["idle"] = new List<dynamic> { 0, 1 },
-                ["walk"] = new List<dynamic> { 3, 0 },
-                ["crouch"] = new List<dynamic> { 2 },
-                ["swim"] = new List<dynamic> { 13, 14, 15 },
-                ["idle hold"] = new List<dynamic> { 7, 8 },
-                ["walk hold"] = new List<dynamic> { 10, 7 },
-                ["crouch hold"] = new List<dynamic> { 9 },
-                ["swim hold"] = new List<dynamic> { 16, 17, 18 },
-                ["run"] = new List<dynamic> { 5, 4 },
-                ["jump"] = new List<dynamic> { 11, 12 },
-                ["skid"] = new List<dynamic> { 6 },
-                ["run jump"] = new List<dynamic> { 15 },
-                ["spin"] = new List<dynamic> { 0, 19, 0.5, 20 },
-                ["slide"] = new List<dynamic> { 21 },
-                ["kick"] = new List<dynamic> { 22 }
+                ["idle"] = new List<double> { 0, 1 },
+                ["walk"] = new List<double> { 3, 0 },
+                ["crouch"] = new List<double> { 2 },
+                ["swim"] = new List<double> { 13, 14, 15 },
+                ["idle hold"] = new List<double> { 7, 8 },
+                ["walk hold"] = new List<double> { 10, 7 },
+                ["crouch hold"] = new List<double> { 9 },
+                ["swim hold"] = new List<double> { 16, 17, 18 },
+                ["run"] = new List<double> { 5, 4 },
+                ["jump"] = new List<double> { 11, 12 },
+                ["skid"] = new List<double> { 6 },
+                ["run jump"] = new List<double> { 15 },
+                ["spin"] = new List<double> { 0, 19, 0.5, 20 },
+                ["slide"] = new List<double> { 21 },
+                ["kick"] = new List<double> { 22 }
             };
-            maskHeight = maskWidth = 32;
+            spriteHeight = spriteWidth = 32;
             rightClip = 10;
             leftClip = 10;
             topClip = 16;
-            texture = Level.Load("Entities/Mario");
+            texture = SMW.Load("Entities/Mario");
         }
 
         // Called before normal update
@@ -69,7 +69,7 @@ namespace SMWEngine.Source
         }
 
         // Main update
-        Timer skidTimer = new Timer();
+        CatTimer skidCatTimer = new CatTimer();
         public override void Update()
         {
             var thisStateFrame = SMW.KeyboardState;
@@ -118,7 +118,6 @@ namespace SMWEngine.Source
             if (speed.Y > 4)
                 speed.Y = 4;
 
-            // ADD A FUCK TON OF STUFF TO ITSELF
             velocity.Y = (inputJump) ? 0.1875f : 0.375f;
             var turning = ((speed.X > 0 && inputLeft && !inputRight) || (speed.X < 0 && inputRight)) ? true : false;
             var accelVar = (turning) ? 0.15625f : 0.09375f;
@@ -127,9 +126,9 @@ namespace SMWEngine.Source
 
             if ((turning || isSliding || isCrouching) && isGrounded && speed.X != 0)
             {
-                if (skidTimer.timeLeft == 0)
+                if (skidCatTimer.timeLeft == 0)
                 {
-                    skidTimer = new Timer().Start(4);
+                    skidCatTimer = new CatTimer().Start(5);
                     var skidSmoke = new SkidSmoke(new Vector2(boundingBox.Center.X - 4, boundingBox.Bottom - 4));
                     skidSmoke.depth = -2;
                     Level.Add(skidSmoke);
@@ -227,10 +226,10 @@ namespace SMWEngine.Source
                 isSliding = false;
 
             if (inputRun && (inputLeft || inputRight))
-                if (Math.Abs(speed.X) >= 2.25f && isGrounded)
+                if (Math.Abs(speed.X) >= 2.25f && isGrounded && !isCrouching)
                     pmeter += 2;
 
-            if ((!inputRun || (!inputLeft && !inputRight) || (Math.Abs(speed.X) < 2.25f)))
+            if (!inputRun || (!inputLeft && !inputRight) || (isCrouching && isGrounded) || (Math.Abs(speed.X) < 2.25f))
                 pmeter -= 2;
 
             if (pmeter <= 0)
@@ -347,23 +346,16 @@ namespace SMWEngine.Source
 
         public override void Draw()
         {
-            var curImgToIndex = Math.Abs((int) Math.Floor(curImage));
-            List<dynamic> intList;
-            animList.TryGetValue(curAnim, out intList);
-            var isFlipped = flipX;
-            if (intList[curImgToIndex] != Math.Floor((float) intList[curImgToIndex]))
+            SpriteEffects isFlipped = flipX;
+            if (animList[curAnim][Math.Abs((int)Math.Floor(curImage))] != Math.Floor((float) animList[curAnim][Math.Abs((int)Math.Floor(curImage))]))
                 isFlipped = (flipX == SpriteEffects.FlipHorizontally) ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-            int positionInSheet = (int) intList[(int) Math.Floor((float) Math.Abs(curImgToIndex))];
-            var drawnPos = new Point((int)position.X+(maskWidth/2), (int)position.Y+(maskHeight/2) + 1);
-            var drawnSize = new Point(maskWidth, maskHeight);
-            var cutOut = new Rectangle(new Point(positionInSheet * drawnSize.X, 0), drawnSize);
-            level.spriteBatch.Draw(texture, new Rectangle(drawnPos, drawnSize), cutOut, Color.White, 0f, new Vector2(maskWidth/2, maskHeight/2), isFlipped, 0);
+            DrawSprite(texture, (int) position.X, (int) position.Y + 1, new Vector2(0.5f, 0.5f), isFlipped, spriteCutOut);
         }
 
         public override void HandleInteractions()
         {
             var entities = level.entities;
-            entities.ForEach(delegate (Entity other)
+            entities.ForEach(delegate (CatEntity other)
             {
                 if (other == this)
                     return;
