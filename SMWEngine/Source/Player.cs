@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGame.Extended;
-using MonoGame.Extended.Input;
 
 namespace SMWEngine.Source
 {
@@ -22,14 +20,14 @@ namespace SMWEngine.Source
         public int pmeterMax = 112;
         public int scuttle = 0;
 
-        bool inputRight => Keyboard.GetState().IsKeyDown(Keys.Right);
-        bool inputLeft => Keyboard.GetState().IsKeyDown(Keys.Left);
-        bool inputUp => Keyboard.GetState().IsKeyDown(Keys.Up);
-        bool inputDown => Keyboard.GetState().IsKeyDown(Keys.Down);
-        bool inputRun => Keyboard.GetState().IsKeyDown(Keys.Z);
-        bool inputJump => Keyboard.GetState().IsKeyDown(Keys.X) || Keyboard.GetState().IsKeyDown(Keys.C);
-        bool inputJumpPressed => SMW.KeyboardState.WasKeyJustUp(Keys.X);
-        bool inputSpinPressed => SMW.KeyboardState.WasKeyJustUp(Keys.C);
+        bool inputRight => SMW.Input.Pressed(Keys.Right);
+        bool inputLeft => SMW.Input.Pressed(Keys.Left);
+        bool inputUp => SMW.Input.Pressed(Keys.Up);
+        bool inputDown => SMW.Input.Pressed(Keys.Down);
+        bool inputRun => SMW.Input.Pressed(Keys.Z);
+        bool inputJump => SMW.Input.Pressed(Keys.X) || SMW.Input.Pressed(Keys.C);
+        bool inputJumpPressed => SMW.Input.JustPressed(Keys.X);
+        bool inputSpinPressed => SMW.Input.JustPressed(Keys.C);
 
         public Player(Vector2 position)
         {
@@ -72,14 +70,8 @@ namespace SMWEngine.Source
         CatTimer skidCatTimer = new CatTimer();
         public override void Update()
         {
-            var thisStateFrame = SMW.KeyboardState;
 
-            if (thisStateFrame.WasKeyJustUp(Keys.V))
-            {
-
-            }
-
-            if (thisStateFrame.WasKeyJustUp(Keys.N))
+            if (SMW.Input.AnyJustPressed(new Keys[] { Keys.W, Keys.N }))
             {
                 noClip = !noClip;
             }
@@ -137,7 +129,7 @@ namespace SMWEngine.Source
 
             if (inputRight && (!isCrouching || !isGrounded))
             {
-                flipX = SpriteEffects.None;
+                flipX = false;
                 if (speed.X < spdCap)
                 {
                     speed.X += accelVar;
@@ -154,7 +146,7 @@ namespace SMWEngine.Source
             }
             else if (inputLeft && (!isCrouching || !isGrounded))
             {
-                flipX = SpriteEffects.FlipHorizontally;
+                flipX = true;
                 if (speed.X > -spdCap)
                 {
                     speed.X -= accelVar;
@@ -256,7 +248,7 @@ namespace SMWEngine.Source
                     isSpinning = false;
                     if (speed.X == 0) {
                         var rand = new Random().Next(1, 3);
-                        flipX = (rand == 1) ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                        flipX = (rand == 1) ? true : false;
                     }
                 }
                 isJumping = false;
@@ -333,7 +325,7 @@ namespace SMWEngine.Source
             }
 
             if (position.Y-16 >= level.levelSize.Y*16)
-                position.Y = (level.levelSize.Y * 16) - 16;
+                position.Y = (level.levelSize.Y * 16)+16;
 
         }
 
@@ -346,10 +338,7 @@ namespace SMWEngine.Source
 
         public override void Draw()
         {
-            SpriteEffects isFlipped = flipX;
-            if (animList[curAnim][Math.Abs((int)Math.Floor(curImage))] != Math.Floor((float) animList[curAnim][Math.Abs((int)Math.Floor(curImage))]))
-                isFlipped = (flipX == SpriteEffects.FlipHorizontally) ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-            DrawSprite(texture, (int) position.X, (int) position.Y + 1, new Vector2(0.5f, 0.5f), isFlipped, spriteCutOut);
+            DrawSprite(texture, (int) position.X, (int) position.Y + 1, new Vector2(0.5f, 0.5f), spriteCutOut);
         }
 
         public override void HandleInteractions()
@@ -369,10 +358,7 @@ namespace SMWEngine.Source
                     {
                         if (boundingBox.Intersects(enemy.boundingBox))
                         {
-                            if (boundingBox.Bottom > enemy.boundingBox.Top && speed.Y > 0)
-                            {
-                                enemy.OnHit(this);
-                            }
+                            enemy.PlayerInteraction(this);
                         }
                     }
                 }

@@ -5,7 +5,6 @@
 /Users/sam/GitHub/MonoMario/SMWEngine/bin/Debug/netcoreapp3.1/SMWEngine.pdb
 /Users/sam/GitHub/MonoMario/SMWEngine/bin/Debug/netcoreapp3.1/MonoGame.Extended.dll
 /Users/sam/GitHub/MonoMario/SMWEngine/bin/Debug/netcoreapp3.1/MonoGame.Extended.Graphics.dll
-/Users/sam/GitHub/MonoMario/SMWEngine/bin/Debug/netcoreapp3.1/MonoGame.Extended.Input.dll
 /Users/sam/GitHub/MonoMario/SMWEngine/bin/Debug/netcoreapp3.1/MonoGame.Framework.dll
 /Users/sam/GitHub/MonoMario/SMWEngine/bin/Debug/netcoreapp3.1/Newtonsoft.Json.dll
 /Users/sam/GitHub/MonoMario/SMWEngine/bin/Debug/netcoreapp3.1/runtimes/linux-x64/native/libSDL2-2.0.so.0

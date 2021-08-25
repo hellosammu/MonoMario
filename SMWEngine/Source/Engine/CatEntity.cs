@@ -66,6 +66,7 @@ namespace SMWEngine.Source
             var foundSlope = false;
             var wasOnSlope = onSlope;
 
+            var BB_Ref = boundingBox;
             for (int x = (int)(boundingBox.Left - 1 - Math.Abs(speed.X)); x <= (int)(boundingBox.Right + 1 + Math.Abs(speed.X)); x += 2)
             {
                 for (int y = (int)(boundingBox.Top - 1 - Math.Abs(speed.Y)); y <= (int)(boundingBox.Bottom + 4 + Math.Abs(speed.Y)); y += 2)
@@ -90,7 +91,6 @@ namespace SMWEngine.Source
                     || (xCheck * 16 > tempBB.Right + 32))
                         continue;
                     var tileWorldPosition = new Rectangle(xCheck * 16, yCheck * 16, 16, 16);
-                    var BB_Ref = boundingBox;
                     var BB_Down = new Rectangle(BB_Ref.X - 1, BB_Ref.Y - 1, BB_Ref.Width + 2, BB_Ref.Height + 2);
                     bool stupidTile = false;
                     if (yCheck < tHeight-1)
@@ -181,8 +181,7 @@ namespace SMWEngine.Source
                         continue;
 
                     var tileWorldPosition = new Rectangle(xCheck * 16, yCheck * 16, 16, 16);
-                    var BB_Ref = boundingBox;
-                    var BB_Down = new Rectangle(BB_Ref.X, BB_Ref.Y-1, BB_Ref.Width, BB_Ref.Height+2);
+                    var BB_Down = new Rectangle(BB_Ref.X-1, BB_Ref.Y-1, BB_Ref.Width+2, BB_Ref.Height+2); // (Check one extra out in each direction)
                     // Down
                     if (!onSlope && speed.Y >= 0 && (tile.colliderType == ColliderType.SOLID || tile.colliderType == ColliderType.PLATFORM))
                     {
@@ -190,8 +189,8 @@ namespace SMWEngine.Source
                         {
                             if ((boundingBox.Bottom >= tileWorldPosition.Top)
                             && (boundingBox.Bottom < tileWorldPosition.Top + 4 + speed.Y)
-                            && (boundingBox.Right + speed.X >= tileWorldPosition.Left)
-                            && (boundingBox.Left + speed.X <= tileWorldPosition.Right))
+                            && (boundingBox.Right - 1 >= tileWorldPosition.Left)
+                            && (boundingBox.Left + 1 <= tileWorldPosition.Right))
                             {
                                 position.Y = tileWorldPosition.Top - spriteHeight;
                                 velocity.Y = 0;
@@ -207,8 +206,8 @@ namespace SMWEngine.Source
                         {
                             if ((boundingBox.Top <= tileWorldPosition.Bottom)
                             && (boundingBox.Top > tileWorldPosition.Bottom - 8)
-                            && (boundingBox.Right-1 >= tileWorldPosition.Left + speed.X)
-                            && (boundingBox.Left+1 <= tileWorldPosition.Right + speed.X))
+                            && (boundingBox.Right - 1 >= tileWorldPosition.Left + speed.X)
+                            && (boundingBox.Left + 1 <= tileWorldPosition.Right + speed.X))
                             {
                                 position.Y = tileWorldPosition.Bottom - topClip;
                                 speed.Y = 0;

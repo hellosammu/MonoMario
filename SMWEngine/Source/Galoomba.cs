@@ -22,7 +22,7 @@ namespace SMWEngine.Source
             base.Update();
         }
 
-        public override void OnJump(Player player)
+        protected override void OnJump(Player player)
         {
             speed.X = 0;
             imgSpeed = 0.125f;

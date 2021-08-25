@@ -20,7 +20,7 @@ namespace SMWEngine.Source
         public Point camPos = Point.Zero;
         public SMW game;
         public List<CatEntity> entities;
-        public Point levelSize = new Point(256, 15);
+        public Point levelSize;
 
         public SpriteBatch spriteBatch;
         public ContentManager Content;
@@ -29,14 +29,13 @@ namespace SMWEngine.Source
         private Player player;
         public Tile[,] tiles;
         public Background background;
-        public bool frozen = false;
 
         public Rectangle cameraBounds
         {
             get
             {
-                var leftSide = MathHelper.Clamp(camPos.X, 0, (levelSize.X * 16) - 256);
-                return new Rectangle(leftSide, -32, 256, (levelSize.Y*16) + 64);
+                var leftSide = MathHelper.Clamp(camPos.X, 0, (levelSize.X * 16) - SMW.gameResolution.X);
+                return new Rectangle(leftSide, -32, SMW.gameResolution.X, (levelSize.Y*16) + 64);
             }
         }
 
@@ -215,7 +214,7 @@ namespace SMWEngine.Source
         static List<CatEntity> addList = new List<CatEntity>();
         public void update(GameTime gameTime)
         {
-            if (!frozen)
+            if (!SMW.frozen)
             {
                 if (entities.Count > 0)
                 {
@@ -334,9 +333,10 @@ namespace SMWEngine.Source
                 yFloor = (int) player.position.Y;
             }
 
-            if (player.isRunning && player.isJumping)
+            if (player.isRunning && !player.isGrounded)
             {
                 yMod += player.position.Y - player.positionLast.Y;
+                Console.WriteLine("WTF");
             }
             else if (yMod < player.position.Y)
             {
@@ -356,16 +356,16 @@ namespace SMWEngine.Source
 
             camPos.X = (int) Math.Floor(rawCamPosX);
             camPos.Y = (int) Math.Floor(rawCamPosY);
-            var _x = MathHelper.Clamp(camPos.X, 0, (levelSize.X * 16) - 256);
-            var _y = MathHelper.Clamp(camPos.Y, 0, (levelSize.Y * 16) - 240);
+            var _x = MathHelper.Clamp(camPos.X, 0, (levelSize.X * 16) - SMW.gameResolution.X);
+            var _y = MathHelper.Clamp(camPos.Y, 0, (levelSize.Y * 16) - SMW.gameResolution.Y - 16);
             camera = Matrix.CreateTranslation(new Vector3(-_x, -_y, 0));
 
         }
         public int xSide = 0;
-        public float xMod = 128;
+        public float xMod = SMW.gameResolution.X/2;
         public float rawCamPosX
         {
-            get => (float) xMod - 128f;
+            get => (float) xMod - SMW.gameResolution.X/2;
             set => rawCamPosX = value;
         }
 
@@ -373,7 +373,7 @@ namespace SMWEngine.Source
         public float yMod = 112;
         public float rawCamPosY
         {
-            get => (float) yMod - 112;
+            get => (float) yMod - SMW.gameResolution.Y/2;
             set => rawCamPosY = value;
         }
 
@@ -399,8 +399,8 @@ namespace SMWEngine.Source
             for (int i = 0; i < Math.Ceiling(((levelSize.X / (background.texture.Width / 16f)) / 2)); i ++)
             {
                 var _x = (camPos.X / 2) + (i * background.texture.Width);
-                var clampedX = MathHelper.Clamp(_x, 0+(background.texture.Width*i), (levelSize.X * 16) - 128 - (background.texture.Width * i));
-                bgRect = new Rectangle((int) clampedX, (levelSize.Y * 16) - 512 + 64, background.texture.Width, background.texture.Height);
+                var clampedX = MathHelper.Clamp(_x, 0+(background.texture.Width*i), (levelSize.X * 16) - SMW.gameResolution.X/2 - (background.texture.Width * i));
+                bgRect = new Rectangle((int) clampedX, (levelSize.Y * 16) - background.texture.Height, background.texture.Width, background.texture.Height);
                 spriteBatch.Draw(background.texture, bgRect, CatColor.WHITE);
             }
             bgRect.X += background.texture.Width;
@@ -409,9 +409,9 @@ namespace SMWEngine.Source
 
         public void DrawTiles()
         {
-            float farLeft = MathHelper.Clamp((camPos.X / 16f), 0, (levelSize.X) - 256f/16f);
+            float farLeft = MathHelper.Clamp((camPos.X / 16f), 0, (levelSize.X) - SMW.gameResolution.X / 16f);
             // Tile
-            for (int x = (int) Math.Floor(farLeft); x < (int) (Math.Ceiling(farLeft+(256f/16f))); x ++)
+            for (int x = (int) Math.Floor(farLeft); x < (int) (Math.Ceiling(farLeft+(SMW.gameResolution.X / 16f))); x ++)
             {
                 for (int y = 0; y < levelSize.Y; y ++)
                 {

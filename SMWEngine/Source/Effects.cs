@@ -28,7 +28,7 @@ namespace SMWEngine.Source
 
         public override void Draw()
         {
-            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, SpriteEffects.None, spriteCutOut);
+            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, spriteCutOut);
         }
 
         public override void EarlyUpdate()
@@ -76,7 +76,7 @@ namespace SMWEngine.Source
             var posRect = new Rectangle((int)position.X, (int)position.Y, spriteWidth, spriteHeight);
             var imgIndexReal = (int)Math.Floor(curImage);
             var cutOutRect = new Rectangle(imgIndexReal * spriteWidth, 0, spriteWidth, spriteHeight);
-            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, flipX, cutOutRect);
+            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, cutOutRect);
         }
 
         public override void Update()
@@ -121,10 +121,10 @@ namespace SMWEngine.Source
             var xTensity = 2.25f;
             var yTensity = 1.125f;
             var distOut = Math.Clamp(timer.elapsedTime, 0, 10);
-            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
-            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
-            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
-            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
+            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), Rectangle.Empty);
+            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), Rectangle.Empty);
+            DrawSprite(texture, (int) (position.X - (distOut * xTensity)), (int) (position.Y + (distOut * yTensity)), new Vector2(0.5f, 0.5f), Rectangle.Empty);
+            DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), Rectangle.Empty);
         }
 
         public override void EarlyUpdate()
@@ -166,7 +166,7 @@ namespace SMWEngine.Source
 
         public override void Draw()
         {
-            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, flipX, spriteCutOut);
+            DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, spriteCutOut);
         }
 
         public override void EarlyUpdate()

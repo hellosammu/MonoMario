@@ -50,7 +50,7 @@ namespace SMWEngine.Source
             HandleCollisions();
             if (atWall && speed.X == 0)
                 speed.X = -speedLast.X;
-            flipX = (speed.X < 0) ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+            flipX = (speed.X < 0) ? true : false;
             if (boundingBox.Y >= level.levelSize.Y*16)
                 Level.Remove(this);
         }
@@ -65,6 +65,11 @@ namespace SMWEngine.Source
             var entities = level.entities;
             entities.ForEach(delegate(CatEntity other)
             {
+                // Return if interacting with self
+                if (other.Equals((CatEntity) this))
+                    return;
+
+                // If the entity you are interacting with is an enemy, collide with them
                 if (other is Enemy)
                 {
                     var enemy = (Enemy) other;
@@ -85,15 +90,16 @@ namespace SMWEngine.Source
             #region Flip
             if (myBB.Intersects(enemyBB))
             {
-                if (speed.X <= 0 && enemy.speed.X >= 0)
+                if (speed.X <= 0 && enemy.speed.X > 0)
                 {
                     if (myBB.Right >= enemyBB.Left)
                     {
                         speed.X = -speed.X;
                         enemy.speed.X = -enemy.speed.X;
+                        Console.WriteLine("UWU");
                     }
                 }
-                else if (speed.X >= 0 && enemy.speed.X <= 0)
+                else if (speed.X >= 0 && enemy.speed.X < 0)
                 {
                     if (myBB.Left >= enemyBB.Right)
                     {
@@ -107,15 +113,16 @@ namespace SMWEngine.Source
 
         public override void Draw()
         {
-            var isFlipped = flipX;
-
-            if (animList[curAnim][Math.Abs((int)Math.Floor(curImage))] != Math.Floor((float)animList[curAnim][Math.Abs((int)Math.Floor(curImage))]))
-                isFlipped = (flipX == SpriteEffects.FlipHorizontally) ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
-
-            DrawSprite(texture, position.X, position.Y+1, new Vector2(0.5f, 0.5f), isFlipped, spriteCutOut);
+            DrawSprite(texture, position.X, position.Y+1, new Vector2(0.5f, 0.5f), spriteCutOut);
         }
 
-        public virtual void OnHit(Player player)
+        public virtual void PlayerInteraction(Player player)
+        {
+            if (player.boundingBox.Bottom > boundingBox.Top && player.speed.Y > 0)
+                OnHit(player);
+        }
+
+        protected virtual void OnHit(Player player)
         {
             if (!isHittable)
                 return;
@@ -132,7 +139,7 @@ namespace SMWEngine.Source
             new CatTimer().Start(8, () => isHittable = true);
         }
 
-        public virtual void OnJump(Player player)
+        protected virtual void OnJump(Player player)
         {
             player.speed.Y = -5.5f;
             player.isJumping = false;
@@ -144,7 +151,7 @@ namespace SMWEngine.Source
 
         }
 
-        public virtual void OnSpin(Player player)
+        protected virtual void OnSpin(Player player)
         {
             player.speed.Y = -0.925f;
             Level.Add(new Smoke()
@@ -158,6 +165,5 @@ namespace SMWEngine.Source
             });
             Level.Remove(this);
         }
-
     }
 }

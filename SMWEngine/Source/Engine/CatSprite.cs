@@ -51,8 +51,8 @@ namespace SMWEngine.Source
         public float imageAngle = 0f;
 
         // Whether the object is flipped or not
-        public SpriteEffects flipX = SpriteEffects.None;
-        public SpriteEffects flipY = SpriteEffects.None;
+        public bool flipX = false;
+        public bool flipY = false;
 
         protected Rectangle spriteCutOut
         {
@@ -85,17 +85,29 @@ namespace SMWEngine.Source
                     curImage -= animList[curAnim].Count;
         }
 
-        protected void DrawSprite(Texture2D sprite, float X, float Y, Vector2 _pivot, SpriteEffects spriteEffect, Rectangle _spriteCutOut)
+        protected void DrawSprite(Texture2D sprite, float X, float Y, Vector2 _pivot, Rectangle _spriteCutOut)
         {
             Rectangle drawnCutOut = _spriteCutOut;
             if (_spriteCutOut == Rectangle.Empty)
             {
                 drawnCutOut = new Rectangle(Point.Zero, new Point(sprite.Width, sprite.Height));
             }
+
+            // Flip sprite (X axis)
+            SpriteEffects isFlippedX = (flipX) ? SpriteEffects.FlipHorizontally : SpriteEffects.None;
+
+            // Extra flip based on animation parameter
+            if (animList != null)
+                if (animList[curAnim][Math.Abs((int)Math.Floor(curImage))] != Math.Floor((float)animList[curAnim][Math.Abs((int)Math.Floor(curImage))]))
+                    isFlippedX = (flipX) ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+
+            // Flip sprite (Y axis)
+            SpriteEffects isFlippedY = (flipY) ? SpriteEffects.FlipVertically : SpriteEffects.None;
+
             // Get true pivot by multiplying the halves
             var __pivot = new Vector2((float) Math.Floor(drawnCutOut.Width * _pivot.X), (float)Math.Floor(drawnCutOut.Height * _pivot.Y));
             // Draw the sprite
-            level.spriteBatch.Draw(sprite, new Rectangle(new Point((int) Math.Floor(X) + (int) Math.Floor(__pivot.X), (int) Math.Floor(Y) + (int) Math.Floor(__pivot.Y)), new Point(drawnCutOut.Width, drawnCutOut.Height)), drawnCutOut, imageBlend * imageAlpha, imageAngle / 360f, __pivot, spriteEffect | flipY, 0f);
+            level.spriteBatch.Draw(sprite, new Rectangle(new Point((int) Math.Floor(X) + (int) Math.Floor(__pivot.X), (int) Math.Floor(Y) + (int) Math.Floor(__pivot.Y)), new Point(drawnCutOut.Width, drawnCutOut.Height)), drawnCutOut, imageBlend * imageAlpha, imageAngle / 360f, __pivot, isFlippedX | isFlippedY, 0f);
         }
     }
 }

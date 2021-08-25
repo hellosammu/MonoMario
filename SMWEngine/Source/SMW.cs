@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using MonoGame.Extended.Input;
 using SMWEngine.Source;
+using SMWEngine.Source.Engine;
 
 namespace SMWEngine
 {
     public class SMW : Game
     {
-        public static Point gameResolution = new Point(256, 224);
+        public static Point gameResolution = new Point(376, 216);
         public int gameScale
         {
             get
@@ -27,7 +26,6 @@ namespace SMWEngine
                 _graphics.ApplyChanges();
             }
         }
-
         private int _gameScale;
 
         public GraphicsDeviceManager _graphics;
@@ -37,6 +35,8 @@ namespace SMWEngine
         public RenderTarget2D sprites;
         public RenderTarget2D hud;
         public static GraphicsDevice graphicsDevice;
+
+        internal static bool frozen = false;
 
         public SMW()
         {
@@ -100,15 +100,15 @@ namespace SMWEngine
             level = new Level(_spriteBatch, GraphicsDevice, Content);
         }
 
-        public static KeyboardStateExtended KeyboardState;
+        public static CatInputState Input;
 
         Color colorInterp = Color.White;
         protected override void Update(GameTime gameTime)
         {
             // Global keyboard state
-            SMW.KeyboardState = KeyboardExtended.GetState();
+            Input = CatInput.GetState();
 
-            if (SMW.KeyboardState.WasKeyJustUp(Keys.V))
+            if (Input.JustPressed(Keys.V))
             {
                 if (colorInterp != Color.Black)
                     colorInterp = Color.Black;
@@ -116,16 +116,16 @@ namespace SMWEngine
                     colorInterp = Color.Blue;
             }
 
-            if (SMW.KeyboardState.WasKeyJustUp(Keys.R))
+            if (Input.JustPressed(Keys.R))
             {
                 Console.WriteLine(DateTime.Now.Ticks);
                 level = new Level(_spriteBatch, GraphicsDevice, Content);
                 Console.WriteLine(DateTime.Now.Ticks);
             }
 
-            if (SMW.KeyboardState.WasKeyJustUp(Keys.P))
+            if (Input.JustPressed(Keys.P))
                 gameScale ++;
-            if (SMW.KeyboardState.WasKeyJustUp(Keys.O))
+            if (Input.JustPressed(Keys.O))
                 if (gameScale > 1)
                     gameScale --;
 
@@ -167,6 +167,7 @@ namespace SMWEngine
         // Graphic loading/caching system
         public static Dictionary<int, Texture2D> tileMapTextures = new Dictionary<int, Texture2D>();
         public static Dictionary<string, Texture2D> spriteTextures = new Dictionary<string, Texture2D>();
+
         public static Texture2D Load(string directory)
         {
             var realDir = "Assets/Sprites/" + directory + ".png";

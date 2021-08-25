@@ -17,8 +17,8 @@ namespace SMWEngine.Source
 
         public void Draw()
         {
-            DrawSprite(reserveSprite, 128-16, 24-16, new Vector2(0.5f, 0.5f), SpriteEffects.None, Rectangle.Empty);
-            DrawSprite(timeSprite, 152, 15, Vector2.Zero, SpriteEffects.None, Rectangle.Empty);
+            DrawSprite(reserveSprite, (SMW.gameResolution.X / 2)- 16, 24-16, new Vector2(0.5f, 0.5f), Rectangle.Empty);
+            DrawSprite(timeSprite, (SMW.gameResolution.X / 2) + 24, 15, Vector2.Zero, Rectangle.Empty);
         }
 
     }
