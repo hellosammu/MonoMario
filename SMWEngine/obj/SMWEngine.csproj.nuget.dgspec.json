@@ -1,25 +1,31 @@
 {
   "format": 1,
   "restore": {
-    "/Users/sam/GitHub/MonoMario/SMWEngine/SMWEngine.csproj": {}
+    "C:\\Users\\Sam\\Documents\\GitHub\\MonoMario\\SMWEngine\\SMWEngine.csproj": {}
   },
   "projects": {
-    "/Users/sam/GitHub/MonoMario/SMWEngine/SMWEngine.csproj": {
+    "C:\\Users\\Sam\\Documents\\GitHub\\MonoMario\\SMWEngine\\SMWEngine.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/sam/GitHub/MonoMario/SMWEngine/SMWEngine.csproj",
+        "projectUniqueName": "C:\\Users\\Sam\\Documents\\GitHub\\MonoMario\\SMWEngine\\SMWEngine.csproj",
         "projectName": "SMWEngine",
-        "projectPath": "/Users/sam/GitHub/MonoMario/SMWEngine/SMWEngine.csproj",
-        "packagesPath": "/Users/sam/.nuget/packages/",
-        "outputPath": "/Users/sam/GitHub/MonoMario/SMWEngine/obj/",
+        "projectPath": "C:\\Users\\Sam\\Documents\\GitHub\\MonoMario\\SMWEngine\\SMWEngine.csproj",
+        "packagesPath": "C:\\Users\\Sam\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Sam\\Documents\\GitHub\\MonoMario\\SMWEngine\\obj\\",
         "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        ],
         "configFilePaths": [
-          "/Users/sam/.config/NuGet/NuGet.Config"
+          "C:\\Users\\Sam\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp3.1"
         ],
         "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -66,7 +72,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/5.0.400/RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.303\\RuntimeIdentifierGraph.json"
         }
       }
     }

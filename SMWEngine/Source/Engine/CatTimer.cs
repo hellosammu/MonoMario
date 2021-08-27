@@ -97,7 +97,7 @@ namespace SMWEngine.Source
 
         // Global timer stuff
         public static List<CatTimer> timers = new List<CatTimer>();
-        public static void Update()
+        public static void Update(float elapsed)
         {
             // Iterate through each timer
             timers.ToList().ForEach(delegate (CatTimer timer)
@@ -109,11 +109,13 @@ namespace SMWEngine.Source
                 if (timer.timeLeft > 0)
                 {
                     // Subtract counter
-                    timer._timeLeft --;
+                    timer._timeLeft -= (elapsed * SMW.multiplyFPS);
                     // Trigger update method
                     if (timer.onUpdate != null)
                         timer.onUpdate();
                     // Don't complete on the frame that the timer reaches 0
+                    if (timer._timeLeft <= 0)
+                        timer._timeLeft = 0;
                     return;
                 }
                 // If timer is finished

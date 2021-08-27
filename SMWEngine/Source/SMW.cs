@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SMWEngine.Source;
@@ -36,17 +37,18 @@ namespace SMWEngine
         public RenderTarget2D hud;
         public static GraphicsDevice graphicsDevice;
 
+        float targetFPS = 60f;
+        public static float multiplyFPS = 60f;
+
         internal static bool frozen = false;
 
         public SMW()
         {
-            new CatTimer().Start(60, () =>
-            {
-                long memory = GC.GetTotalMemory(true);
-                Console.WriteLine((memory / 1024f));
-            }, 0);
             _graphics = new GraphicsDeviceManager(this);
-            Content.RootDirectory = "Assets";
+            Content.RootDirectory = "Content";
+            IsFixedTimeStep = true;
+            _graphics.SynchronizeWithVerticalRetrace = false;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000f/targetFPS);
             IsMouseVisible = true;
         }
 
@@ -101,20 +103,12 @@ namespace SMWEngine
         }
 
         public static CatInputState Input;
-
-        Color colorInterp = Color.White;
+        public static float elapsed;
         protected override void Update(GameTime gameTime)
         {
             // Global keyboard state
             Input = CatInput.GetState();
-
-            if (Input.JustPressed(Keys.V))
-            {
-                if (colorInterp != Color.Black)
-                    colorInterp = Color.Black;
-                else
-                    colorInterp = Color.Blue;
-            }
+            elapsed = (float) gameTime.ElapsedGameTime.TotalSeconds;
 
             if (Input.JustPressed(Keys.R))
             {
@@ -123,23 +117,35 @@ namespace SMWEngine
                 Console.WriteLine(DateTime.Now.Ticks);
             }
 
-            if (Input.JustPressed(Keys.P))
+            /*if (Input.JustPressed(Keys.P))
                 gameScale ++;
+
             if (Input.JustPressed(Keys.O))
                 if (gameScale > 1)
                     gameScale --;
 
+            if (Input.JustPressed(Keys.OemPlus))
+            {
+                targetFPS += 5;
+                TargetElapsedTime = TimeSpan.FromMilliseconds(1000f / targetFPS);
+            }
+            else if (Input.JustPressed(Keys.OemMinus))
+            {
+                targetFPS -= 5;
+                TargetElapsedTime = TimeSpan.FromMilliseconds(1000f / targetFPS);
+            }*/
+                
+
             #region Updates
 
-            level.update(gameTime);
-            CatTimer.Update();
+            float delta = (float) gameTime.ElapsedGameTime.TotalSeconds;
+            level.update(delta);
+            CatTimer.Update(delta);
             base.Update(gameTime);
 
             #endregion
 
         }
-
-        
 
         protected override void Draw(GameTime gameTime)
         {
@@ -167,21 +173,41 @@ namespace SMWEngine
         // Graphic loading/caching system
         public static Dictionary<int, Texture2D> tileMapTextures = new Dictionary<int, Texture2D>();
         public static Dictionary<string, Texture2D> spriteTextures = new Dictionary<string, Texture2D>();
+        public static Dictionary<string, SoundEffect> soundEffects = new Dictionary<string, SoundEffect>();
 
-        public static Texture2D Load(string directory)
+        public static dynamic Load(string directory)
         {
-            var realDir = "Assets/Sprites/" + directory + ".png";
-            Texture2D ret;
+            var realDir = "";
+            Texture2D ret = null;
+            SoundEffect retSound = null;
             var added = spriteTextures.TryGetValue(directory, out ret);
             if (!added)
+                added = soundEffects.TryGetValue(directory, out retSound);
+            if (!added)
             {
-                Console.WriteLine("Loading " + realDir);
-                Stream fileStream = File.OpenRead(realDir);
-                ret = Texture2D.FromStream(SMW.graphicsDevice, fileStream);
-                fileStream.Close();
-                spriteTextures.Add(directory, ret);
-                Console.WriteLine("[✓] Loaded " + realDir);
+                try
+                {
+                    realDir = "Assets/Sprites/" + directory + ".png";
+                    Stream fileStream = File.OpenRead(realDir);
+                    ret = Texture2D.FromStream(SMW.graphicsDevice, fileStream);
+                    spriteTextures.Add(directory, ret);
+                    fileStream.Close();
+                    Console.WriteLine("[✓] Loaded " + realDir);
+                    return ret;
+                }
+                catch (Exception)
+                {
+                    realDir = "Assets/Sounds/" + directory + ".wav";
+                    Stream fileStream = File.OpenRead(realDir);
+                    retSound = SoundEffect.FromStream(fileStream);
+                    soundEffects.Add(directory, retSound);
+                    fileStream.Close();
+                    Console.WriteLine("[✓] Loaded " + realDir);
+                    return retSound;
+                }
             }
+            if (retSound != null)
+                return retSound;
             return ret;
         }
 

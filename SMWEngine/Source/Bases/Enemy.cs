@@ -30,32 +30,35 @@ namespace SMWEngine.Source
             imgSpeed = 0.125f;
         }
 
-        public override void EarlyUpdate()
+        public override void EarlyUpdate(float elapsed)
         {
 
         }
 
-        public override void Update()
+        public override void Update(float elapsed)
         {
             HandleInteractions();
             var myBB = boundingBox;
             velocity.Y = 0.1875f;
-            speed += velocity;
-            if (speed.Y > 4)
-                speed.Y = 4;
-            position += speed;
-            var speedLast = speed;
-            if (isGrounded)
-                speed.Y = 0;
-            HandleCollisions();
-            if (atWall && speed.X == 0)
-                speed.X = -speedLast.X;
+            for (int i = 0; i < 4; i ++)
+            {
+                speed += velocity * (elapsed * 15f);
+                if (speed.Y > 4)
+                    speed.Y = 4;
+                position += speed * (elapsed * 15f);
+                var speedLast = speed;
+                if (isGrounded)
+                    speed.Y = 0;
+                HandleCollisions(elapsed);
+                if (atWall && speed.X == 0)
+                    speed.X = -speedLast.X;
+            }
             flipX = (speed.X < 0) ? true : false;
             if (boundingBox.Y >= level.levelSize.Y*16)
                 Level.Remove(this);
         }
 
-        public override void LateUpdate()
+        public override void LateUpdate(float elapsed)
         {
 
         }
@@ -101,7 +104,7 @@ namespace SMWEngine.Source
                 }
                 else if (speed.X >= 0 && enemy.speed.X < 0)
                 {
-                    if (myBB.Left >= enemyBB.Right)
+                    if (myBB.Left <= enemyBB.Right)
                     {
                         speed.X = -speed.X;
                         enemy.speed.X = -enemy.speed.X;

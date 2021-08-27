@@ -1,14 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "qMcbABWIW692fpamDGZXfj3Yxeu/knUEvWXdqEI9g23nWHEO4ExlYmxRrE1KvrbpMZmkNKUxpNedXxL0acHu6Q==",
+  "dgSpecHash": "D8V5Du7aeluJLKbtWa+VSfYByNut1oxTwoNGQMELUlu4uXX/2t324jeP73ShrhCqRP19SZF4zRjrFsvOVOTMBQ==",
   "success": true,
-  "projectFilePath": "/Users/sam/GitHub/MonoMario/SMWEngine/SMWEngine.csproj",
+  "projectFilePath": "C:\\Users\\Sam\\Documents\\GitHub\\MonoMario\\SMWEngine\\SMWEngine.csproj",
   "expectedPackageFiles": [
-    "/Users/sam/.nuget/packages/monogame.content.builder.task/3.8.0.1641/monogame.content.builder.task.3.8.0.1641.nupkg.sha512",
-    "/Users/sam/.nuget/packages/monogame.extended/3.8.0/monogame.extended.3.8.0.nupkg.sha512",
-    "/Users/sam/.nuget/packages/monogame.extended.graphics/3.8.0/monogame.extended.graphics.3.8.0.nupkg.sha512",
-    "/Users/sam/.nuget/packages/monogame.framework.desktopgl/3.8.0.1641/monogame.framework.desktopgl.3.8.0.1641.nupkg.sha512",
-    "/Users/sam/.nuget/packages/newtonsoft.json/12.0.3/newtonsoft.json.12.0.3.nupkg.sha512"
+    "C:\\Users\\Sam\\.nuget\\packages\\monogame.content.builder.task\\3.8.0.1641\\monogame.content.builder.task.3.8.0.1641.nupkg.sha512",
+    "C:\\Users\\Sam\\.nuget\\packages\\monogame.extended\\3.8.0\\monogame.extended.3.8.0.nupkg.sha512",
+    "C:\\Users\\Sam\\.nuget\\packages\\monogame.extended.graphics\\3.8.0\\monogame.extended.graphics.3.8.0.nupkg.sha512",
+    "C:\\Users\\Sam\\.nuget\\packages\\monogame.framework.desktopgl\\3.8.0.1641\\monogame.framework.desktopgl.3.8.0.1641.nupkg.sha512",
+    "C:\\Users\\Sam\\.nuget\\packages\\newtonsoft.json\\12.0.3\\newtonsoft.json.12.0.3.nupkg.sha512"
   ],
   "logs": []
 }

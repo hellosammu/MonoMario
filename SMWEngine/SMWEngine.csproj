@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -8,28 +8,19 @@
   <PropertyGroup>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Icon.ico</ApplicationIcon>
+    <StartupObject />
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Icon.ico" />
     <None Remove="Icon.bmp" />
     <None Remove="Source\" />
-    <None Remove="MonoGame.Extended.Graphics" />
-    <None Remove="MonoGame.Extended.Tiled" />
-    <None Remove="MonoGame.Extended.Input" />
-    <None Remove="Assets\Content.mgcb" />
-    <None Remove="Assets\Misc. Content\" />
-    <None Remove="Assets\Misc. Content\obj\" />
-    <None Remove="Assets\Misc. Content\Assets.mgcb" />
-    <None Remove="Assets\MiscContent.mgcb" />
-    <None Remove="Source\Engine\" />
-    <None Remove="Source\Bases\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Icon.ico" />
     <EmbeddedResource Include="Icon.bmp" />
   </ItemGroup>
   <ItemGroup>
-    <MonoGameContentReference Include="Assets\Assets.mgcb" />
+    <MonoGameContentReference Include="Content\Content.mgcb" />
   </ItemGroup>
   <ItemGroup>
     <TrimmerRootAssembly Include="Microsoft.Xna.Framework.Content.ContentTypeReader" Visible="false" />
@@ -40,24 +31,10 @@
     <PackageReference Include="MonoGame.Extended.Graphics" Version="3.8.0" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Source\" />
-    <Folder Include="Source\Engine\" />
     <Folder Include="Source\Bases\" />
   </ItemGroup>
   <ItemGroup>
-    <None Update="Assets\Levels\Level.hs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Levels\Level.tmx">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Levels\Ground.tsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Levels\Forest.tsx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Assets\Levels\Level2.tmx">
+    <None Update="Assets\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

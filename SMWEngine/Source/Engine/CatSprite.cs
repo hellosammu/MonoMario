@@ -74,10 +74,10 @@ namespace SMWEngine.Source
         /*
          * Call this ONCE per-frame to update animations of object. Done automatically for added entities
          * */
-        public void UpdateAnimations()
+        public void UpdateAnimations(float elapsed)
         {
             // Update the current image by the image speed
-            curImage += imgSpeed;
+            curImage += imgSpeed * (elapsed * SMW.multiplyFPS);
 
             // If the current image is above the animation number, go downwards by the list amount
             if (animList != null)

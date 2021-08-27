@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -16,7 +17,7 @@ namespace SMWEngine.Source
         public bool isCrouching = false;
         public bool isSliding = false;
         public bool noClip = false;
-        public int pmeter = 0;
+        public float pmeter = 0;
         public int pmeterMax = 112;
         public int scuttle = 0;
 
@@ -28,6 +29,9 @@ namespace SMWEngine.Source
         bool inputJump => SMW.Input.Pressed(Keys.X) || SMW.Input.Pressed(Keys.C);
         bool inputJumpPressed => SMW.Input.JustPressed(Keys.X);
         bool inputSpinPressed => SMW.Input.JustPressed(Keys.C);
+
+        public SoundEffect jumpSound = SMW.Load("Jump");
+        public SoundEffect spinSound = SMW.Load("Spin");
 
         public Player(Vector2 position)
         {
@@ -61,14 +65,14 @@ namespace SMWEngine.Source
         }
 
         // Called before normal update
-        public override void EarlyUpdate()
+        public override void EarlyUpdate(float elapsed)
         {
 
         }
 
         // Main update
         CatTimer skidCatTimer = new CatTimer();
-        public override void Update()
+        public override void Update(float elapsed)
         {
 
             if (SMW.Input.AnyJustPressed(new Keys[] { Keys.W, Keys.N }))
@@ -82,23 +86,23 @@ namespace SMWEngine.Source
                 speed = Vector2.Zero;
                 if (inputRight)
                 {
-                    position.X += 4 * runFactor;
-                    speed.X = 4 * runFactor;
+                    position.X += (4 * runFactor) * (elapsed * SMW.multiplyFPS);
+                    speed.X = (4 * runFactor) * (elapsed * SMW.multiplyFPS);
                 }
                 else if (inputLeft)
                 {
-                    position.X -= 4 * runFactor;
-                    speed.X = -4 * runFactor;
+                    position.X -= (4 * runFactor) * (elapsed * SMW.multiplyFPS);
+                    speed.X = (-4 * runFactor) * (elapsed * SMW.multiplyFPS);
                 }
                 if (inputUp)
                 {
-                    position.Y -= 4 * runFactor;
-                    speed.Y = -4 * runFactor;
+                    position.Y -= (4 * runFactor) * (elapsed * SMW.multiplyFPS);
+                    speed.Y = (-4 * runFactor) * (elapsed * SMW.multiplyFPS);
                 }
                 else if (inputDown)
                 {
-                    position.Y += 4 * runFactor;
-                    speed.Y = 4 * runFactor;
+                    position.Y += (4 * runFactor) * (elapsed * SMW.multiplyFPS);
+                    speed.Y = (4 * runFactor) * (elapsed * SMW.multiplyFPS);
                 }
                 imgSpeed = 0;
                 return;
@@ -106,9 +110,6 @@ namespace SMWEngine.Source
 
             // Necessary for single presses unfortunately
             var wasGrounded = isGrounded;
-            // Clamp vertical speed
-            if (speed.Y > 4)
-                speed.Y = 4;
 
             velocity.Y = (inputJump) ? 0.1875f : 0.375f;
             var turning = ((speed.X > 0 && inputLeft && !inputRight) || (speed.X < 0 && inputRight)) ? true : false;
@@ -132,7 +133,7 @@ namespace SMWEngine.Source
                 flipX = false;
                 if (speed.X < spdCap)
                 {
-                    speed.X += accelVar;
+                    speed.X += (accelVar) * (elapsed * SMW.multiplyFPS);
                     if (speed.X > spdCap)
                         speed.X = spdCap;
                 }
@@ -140,7 +141,7 @@ namespace SMWEngine.Source
                 {
                     if (speed.X > spdCap + (accelVar * 4))
                     {
-                        speed.X -= (accelVar * 2) * (slipMod);
+                        speed.X -= ((accelVar * 2) * (slipMod)) * (elapsed * SMW.multiplyFPS);
                     }
                 }
             }
@@ -149,7 +150,7 @@ namespace SMWEngine.Source
                 flipX = true;
                 if (speed.X > -spdCap)
                 {
-                    speed.X -= accelVar;
+                    speed.X -= (accelVar) * (elapsed * SMW.multiplyFPS);
                     if (speed.X < -spdCap)
                         speed.X = -spdCap;
                 }
@@ -157,7 +158,7 @@ namespace SMWEngine.Source
                 {
                     if (speed.X < -spdCap - (accelVar * 4))
                     {
-                        speed.X += (accelVar * 2) * (slipMod);
+                        speed.X += ((accelVar * 2) * (slipMod)) * (elapsed * SMW.multiplyFPS);
                     }
                 }
             }
@@ -166,7 +167,7 @@ namespace SMWEngine.Source
                 // Slow down
                 if (speed.X != 0 && isGrounded)
                 {
-                    speed.X -= Math.Sign(speed.X)*0.0625f;
+                    speed.X -= (Math.Sign(speed.X)*0.0625f) * (elapsed * SMW.multiplyFPS);
                     if (Math.Abs(speed.X) <= 0.0625f)
                     {
                         speed.X = 0;
@@ -194,7 +195,7 @@ namespace SMWEngine.Source
 
             if (isSliding && onSlope)
             {
-                speed.X += (slopeIntensity * 0.09375f);
+                speed.X += (slopeIntensity * 0.09375f) * (elapsed * SMW.multiplyFPS);
                 if (slopeIntensity != 0)
                 {
                     if (Math.Sign(speed.X) == (Math.Sign(slopeIntensity)))
@@ -219,10 +220,10 @@ namespace SMWEngine.Source
 
             if (inputRun && (inputLeft || inputRight))
                 if (Math.Abs(speed.X) >= 2.25f && isGrounded && !isCrouching)
-                    pmeter += 2;
+                    pmeter += (2f * (elapsed * SMW.multiplyFPS));
 
             if (!inputRun || (!inputLeft && !inputRight) || (isCrouching && isGrounded) || (Math.Abs(speed.X) < 2.25f))
-                pmeter -= 2;
+                pmeter -= (2f * (elapsed * SMW.multiplyFPS));
 
             if (pmeter <= 0)
                 pmeter = 0;
@@ -237,49 +238,65 @@ namespace SMWEngine.Source
                 isRunning = false;
             }
 
-            speed += velocity;
-            position += speed;
-
-            float runningFloat = (!isRunning) ? 0 : 1f;
-            if (isGrounded)
+            // To look back at and calculate proper delta time for speeds <60 (more like <45)
+            for (int i = 0; i < 1; i ++)
             {
-                if (isSpinning)
+                speed += velocity * (elapsed * SMW.multiplyFPS);
+                position += speed * (elapsed * SMW.multiplyFPS);
+                // Clamp vertical speed
+                if (speed.Y > 4)
+                    speed.Y = 4;
+
+                float runningFloat = (!isRunning) ? 0 : 1f;
+                if (isGrounded)
                 {
-                    isSpinning = false;
-                    if (speed.X == 0) {
-                        var rand = new Random().Next(1, 3);
-                        flipX = (rand == 1) ? true : false;
+                    if (isSpinning)
+                    {
+                        isSpinning = false;
+                        if (speed.X == 0) {
+                            var rand = new Random().Next(1, 3);
+                            flipX = (rand == 1) ? true : false;
+                        }
                     }
+                    isJumping = false;
+                    velocity.Y = 0;
+                    speed.Y = 0;
                 }
-                isJumping = false;
-                velocity.Y = 0;
-                speed.Y = 0;
+
+                if (scuttle > 0)
+                {
+                    scuttle --;
+                }
+
+                if (inputJumpPressed && isGrounded)
+                {
+                    speed.Y = -5f - (Math.Abs(speed.X) / 3.2f / ((2f - runningFloat) / 6f) / 7f);
+                    isJumping = true;
+                    jumpSound.Play();
+                }
+                else if (inputSpinPressed && isGrounded)
+                {
+                    isSpinning = true;
+                    isJumping = true;
+                    isCrouching = false;
+                    speed.Y = -4.6875f - (Math.Abs(speed.X) / 3.2f / ((2f - runningFloat) / 6f) / 7f);
+                    spinSound.Play();
+                }
+
+                lastSpeed = speed;
+                var preVelly = speed.Y;
+                HandleCollisions(elapsed);
+                HandleInteractions();
+                var postVelly = speed.Y;
+
+                if (postVelly != 0)
+                    Console.WriteLine(preVelly + ", " + postVelly);
             }
 
-            if (scuttle > 0)
-            {
-                scuttle --;
-            }
 
-            if (inputJumpPressed && isGrounded)
-            {
-                speed.Y = -5f - (Math.Abs(speed.X) / 3.2f / ((2f - runningFloat) / 6f) / 7f);
-                isJumping = true;
-            }
-            else if (inputSpinPressed && isGrounded)
-            {
-                isSpinning = true;
-                isJumping = true;
-                isCrouching = false;
-                speed.Y = -4.6875f - (Math.Abs(speed.X) / 3.2f / ((2f - runningFloat) / 6f) / 7f);
-            }
-
-            lastSpeed = speed;
-            HandleCollisions();
-            HandleInteractions();
 
             if (wasGrounded != isGrounded && !isGrounded && !isSpinning)
-                scuttle = (int) (Math.Abs(speed.X) * 3.5);
+                scuttle = (int) (Math.Abs(speed.X) * 3.5f);
 
             if (isSliding)
             {
@@ -330,7 +347,7 @@ namespace SMWEngine.Source
         }
 
         // Called after main update
-        public override void LateUpdate()
+        public override void LateUpdate(float elapsed)
         {
 
         }

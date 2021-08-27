@@ -31,7 +31,7 @@ namespace SMWEngine.Source
             DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, spriteCutOut);
         }
 
-        public override void EarlyUpdate()
+        public override void EarlyUpdate(float elapsed)
         {
 
         }
@@ -41,12 +41,12 @@ namespace SMWEngine.Source
 
         }
 
-        public override void LateUpdate()
+        public override void LateUpdate(float elapsed)
         {
 
         }
 
-        public override void Update()
+        public override void Update(float elapsed)
         {
             if (curImage >= animList[curAnim].Count - 1)
                 if (level.entities.Contains(this))
@@ -79,14 +79,14 @@ namespace SMWEngine.Source
             DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, cutOutRect);
         }
 
-        public override void Update()
+        public override void Update(float elapsed)
         {
             if (curImage >= animList[curAnim].Count - 1)
                 if (level.entities.Contains(this))
                     Level.Remove(this);
         }
 
-        public override void EarlyUpdate()
+        public override void EarlyUpdate(float elapsed)
         {
 
         }
@@ -96,7 +96,7 @@ namespace SMWEngine.Source
 
         }
 
-        public override void LateUpdate()
+        public override void LateUpdate(float elapsed)
         {
 
         }
@@ -127,7 +127,7 @@ namespace SMWEngine.Source
             DrawSprite(texture, (int) (position.X + (distOut * xTensity)), (int) (position.Y - (distOut * yTensity)), new Vector2(0.5f, 0.5f), Rectangle.Empty);
         }
 
-        public override void EarlyUpdate()
+        public override void EarlyUpdate(float elapsed)
         {
 
         }
@@ -137,12 +137,12 @@ namespace SMWEngine.Source
 
         }
 
-        public override void LateUpdate()
+        public override void LateUpdate(float elapsed)
         {
 
         }
 
-        public override void Update()
+        public override void Update(float elapsed)
         {
         }
     }
@@ -169,7 +169,7 @@ namespace SMWEngine.Source
             DrawSprite(texture, (int) position.X, (int) position.Y, Vector2.Zero, spriteCutOut);
         }
 
-        public override void EarlyUpdate()
+        public override void EarlyUpdate(float elapsed)
         {
 
         }
@@ -179,12 +179,12 @@ namespace SMWEngine.Source
 
         }
 
-        public override void LateUpdate()
+        public override void LateUpdate(float elapsed)
         {
             star.position = new Vector2(boundingBox.Center.X, boundingBox.Center.Y);
         }
 
-        public override void Update()
+        public override void Update(float elapsed)
         {
             if (curImage >= animList[curAnim].Count-1)
                 if (level.entities.Contains(this))

@@ -38,9 +38,9 @@ namespace SMWEngine.Source
         #endregion
 
         // Called before normal update
-        public abstract void EarlyUpdate();
-        public abstract void Update();
-        public abstract void LateUpdate();
+        public abstract void EarlyUpdate(float elapsed);
+        public abstract void Update(float elapsed);
+        public abstract void LateUpdate(float elapsed);
         public abstract void Draw();
         public abstract void HandleInteractions();
 
@@ -55,7 +55,7 @@ namespace SMWEngine.Source
         /**
          * Global collision system, no real need to modify this per-entity unless some incredibly proprietary collision system is necessary
          * */
-        public void HandleCollisions()
+        public void HandleCollisions(float elapsed)
         {
             isGrounded = false;
             atWall = false;
@@ -67,9 +67,9 @@ namespace SMWEngine.Source
             var wasOnSlope = onSlope;
 
             var BB_Ref = boundingBox;
-            for (int x = (int)(boundingBox.Left - 1 - Math.Abs(speed.X)); x <= (int)(boundingBox.Right + 1 + Math.Abs(speed.X)); x += 2)
+            for (int x = (int) Math.Floor((boundingBox.Left - 1 - Math.Abs(speed.X))); x <= (int) Math.Ceiling((boundingBox.Right + 1 + Math.Abs(speed.X))); x += 2)
             {
-                for (int y = (int)(boundingBox.Top - 1 - Math.Abs(speed.Y)); y <= (int)(boundingBox.Bottom + 4 + Math.Abs(speed.Y)); y += 2)
+                for (int y = (int) Math.Floor((boundingBox.Top - 1 - Math.Abs(speed.Y))); y <= (int) Math.Ceiling((boundingBox.Bottom + 4 + Math.Abs(speed.Y))); y += 2)
                 {
                     // Tile collision position
                     var xCheck = (int)Math.Floor(x / 16f);
@@ -91,7 +91,8 @@ namespace SMWEngine.Source
                     || (xCheck * 16 > tempBB.Right + 32))
                         continue;
                     var tileWorldPosition = new Rectangle(xCheck * 16, yCheck * 16, 16, 16);
-                    var BB_Down = new Rectangle(BB_Ref.X - 1, BB_Ref.Y - 1, BB_Ref.Width + 2, BB_Ref.Height + 2);
+                    var _xCheck = (int) (1 + Math.Abs(speed.X));
+                    var BB_Down = new Rectangle(BB_Ref.X - _xCheck, BB_Ref.Y - 3, BB_Ref.Width + _xCheck*2, BB_Ref.Height + 6);
                     bool stupidTile = false;
                     if (yCheck < tHeight-1)
                         if (level.tiles[xCheck, yCheck + 1] != null)
@@ -156,9 +157,19 @@ namespace SMWEngine.Source
 
             }
 
-            for (int x = (int)(boundingBox.Left - 1 - Math.Abs(speed.X)); x <= (int)(boundingBox.Right + 1 + Math.Abs(speed.X)); x += 2)
+            if (!foundSlope)
             {
-                for (int y = (int)(boundingBox.Top - 1 - Math.Abs(speed.Y)); y <= (int)(boundingBox.Bottom + 4 + Math.Abs(speed.Y)); y += 2)
+                if (!isGrounded && wasOnSlope && speed.Y >= 0)
+                {
+                    speed.Y += (Math.Abs(slopeIntensity * speed.X)) * (elapsed * SMW.multiplyFPS);
+                }
+                onSlope = false;
+            }
+
+            // TODO: FIX MAJOR COLLISION BUG!
+            for (int x = (int) Math.Floor((boundingBox.Left - 1 - Math.Abs(speed.X))); x <= (int) Math.Ceiling((boundingBox.Right + 1 + Math.Abs(speed.X))); x += 1)
+            {
+                for (int y = (int) Math.Floor((boundingBox.Top - 1 - Math.Abs(speed.Y))); y <= (int) Math.Ceiling((boundingBox.Bottom + 4 + Math.Abs(speed.Y))); y += 1)
                 {
                     // Tile collision position
                     var xCheck = (int) Math.Floor(x / 16f);
@@ -181,14 +192,14 @@ namespace SMWEngine.Source
                         continue;
 
                     var tileWorldPosition = new Rectangle(xCheck * 16, yCheck * 16, 16, 16);
-                    var BB_Down = new Rectangle(BB_Ref.X-1, BB_Ref.Y-1, BB_Ref.Width+2, BB_Ref.Height+2); // (Check one extra out in each direction)
+                    var BB_Down = new Rectangle(BB_Ref.Left-1, BB_Ref.Top-1, BB_Ref.Width+2, BB_Ref.Height + 2 + (int) Math.Abs(speed.Y)); // (Check one extra out in each direction)
                     // Down
                     if (!onSlope && speed.Y >= 0 && (tile.colliderType == ColliderType.SOLID || tile.colliderType == ColliderType.PLATFORM))
                     {
                         if (BB_Down.Intersects(tileWorldPosition))
                         {
                             if ((boundingBox.Bottom >= tileWorldPosition.Top)
-                            && (boundingBox.Bottom < tileWorldPosition.Top + 4 + speed.Y)
+                            && (boundingBox.Bottom < tileWorldPosition.Top + 1 + Math.Abs(speed.Y))
                             && (boundingBox.Right - 1 >= tileWorldPosition.Left)
                             && (boundingBox.Left + 1 <= tileWorldPosition.Right))
                             {
@@ -199,6 +210,27 @@ namespace SMWEngine.Source
                             }
                         }
                     }
+                    /*
+                    var tileWorldPosition = new Rectangle(xCheck * 16, yCheck * 16, 16, 16);
+                    var BB_Down = new Rectangle(BB_Ref.Left-1, (int) (BB_Ref.Top - 2 - Math.Abs(speed.Y)), BB_Ref.Width+2, (int) (BB_Ref.Height + (4f * (elapsed * SMW.multiplyFPS)) + (int) Math.Abs(speed.Y)*2)); // (Check one extra out in each direction)
+                    // Down
+                    if (!onSlope && speed.Y >= 0 && (tile.colliderType == ColliderType.SOLID || tile.colliderType == ColliderType.PLATFORM))
+                    {
+                        if (BB_Down.Intersects(tileWorldPosition))
+                        {
+                            if ((boundingBox.Bottom >= tileWorldPosition.Top)
+                            && (boundingBox.Bottom < tileWorldPosition.Top + (1f * (elapsed * SMW.multiplyFPS)) + (Math.Abs(speed.Y) * (elapsed * SMW.multiplyFPS)))
+                            && (boundingBox.Right - 1 >= tileWorldPosition.Left)
+                            && (boundingBox.Left + 1 <= tileWorldPosition.Right))
+                            {
+                                position.Y = tileWorldPosition.Top - spriteHeight;
+                                velocity.Y = 0;
+                                speed.Y = 0;
+                                isGrounded = true;
+                            }
+                        }
+                    }
+                    */
                     // Up
                     else if (speed.Y < 0 && tile.colliderType == ColliderType.SOLID)
                     {
@@ -249,15 +281,6 @@ namespace SMWEngine.Source
                         }
                     }
                 }
-            }
-
-            if (!foundSlope)
-            {
-                if (!isGrounded && wasOnSlope && speed.Y >= 0)
-                {
-                    speed.Y += Math.Abs(slopeIntensity * speed.X);
-                }
-                onSlope = false;
             }
         }
 

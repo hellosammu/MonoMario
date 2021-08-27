@@ -25,6 +25,7 @@ namespace SMWEngine.Source
         public SpriteBatch spriteBatch;
         public ContentManager Content;
 
+        public CatText catText;
 
         private Player player;
         public Tile[,] tiles;
@@ -52,10 +53,11 @@ namespace SMWEngine.Source
             Add(player);
 
             // add some test enemies in
-            var e = new Galoomba(Vector2.Zero);
+            /*var e = new Galoomba(Vector2.Zero);
             Add(e);
             var e2 = new Galoomba(new Vector2(64, 0));
-            Add(e2);
+            Add(e2);*/
+            catText = new CatText(SMW.Load("HUD/Font"), this);
         }
 
         public void LoadLevel()
@@ -101,14 +103,22 @@ namespace SMWEngine.Source
                     foreach (var obj in objects)
                     {
                         // TODO: Make actually work!
-                        /*var objName = (string) obj.Attribute("name");
-                        Vector2 objPos = new Vector2((int) obj.Attribute("x"), (int) obj.Attribute("y"));
-                        Type objType = Type.GetType();
-                        Console.WriteLine(objType);
-                        var entity = Activator.CreateInstance(objType);
-                        var realCatEntity = (CatEntity) entity;
-                        realCatEntity.position = objPos;
-                        Add((CatEntity) entity);*/
+                        var atrName = (string) obj.Attribute("name");
+                        Console.WriteLine(atrName);
+                        Enemy enemy = new Enemy(Vector2.Zero);
+                        switch (atrName.ToLower())
+                        {
+                            // Galoomba / default enemy
+                            default:
+                            case ("galoomba"):
+                                enemy = new Galoomba(new Vector2((float) obj.Attribute("x"), (float) obj.Attribute("y") - 16));
+                                break;
+                            // Koopa
+                            case ("koopa"):
+                                break;
+                        }
+                        enemy.speed.X = -Math.Abs(enemy.speed.X);
+                        Add(enemy);
                     }
                 }
                 // Get tileset information
@@ -212,7 +222,7 @@ namespace SMWEngine.Source
 
         static List<CatEntity> removeList = new List<CatEntity>();
         static List<CatEntity> addList = new List<CatEntity>();
-        public void update(GameTime gameTime)
+        public void update(float elapsed)
         {
             if (!SMW.frozen)
             {
@@ -229,7 +239,7 @@ namespace SMWEngine.Source
                             }
                         }
                         entity.positionLast = entity.position;
-                        entity.EarlyUpdate();
+                        entity.EarlyUpdate(elapsed);
                     });
                     entities.ForEach(delegate (CatEntity entity)
                     {
@@ -241,7 +251,7 @@ namespace SMWEngine.Source
                                 return;
                             }
                         }
-                        entity.Update();
+                        entity.Update(elapsed);
                     });
                     entities.ForEach(delegate (CatEntity entity)
                     {
@@ -253,8 +263,8 @@ namespace SMWEngine.Source
                                 return;
                             }
                         }
-                        entity.LateUpdate();
-                        entity.UpdateAnimations();
+                        entity.LateUpdate(elapsed);
+                        entity.UpdateAnimations(elapsed);
                     });
                 }
             }
@@ -311,7 +321,7 @@ namespace SMWEngine.Source
             {
                 var spdMod = ((player.speed.X > 0) ? player.speed.X : 0);
                 if (centerX > xMod - (16 - 2 - spdMod))
-                    xMod += spdMod + 2;
+                    xMod += (spdMod + 2) * (elapsed * SMW.multiplyFPS);
                 else
                     xMod = centerX + 16;
             }
@@ -319,7 +329,7 @@ namespace SMWEngine.Source
             {
                 var spdMod = ((player.speed.X < 0) ? player.speed.X : 0);
                 if (centerX < xMod + (16 - 2 + spdMod))
-                    xMod -= 2 - spdMod;
+                    xMod -= (2 - spdMod) * (elapsed * SMW.multiplyFPS);
                 else
                     xMod = centerX - 16;
             }
@@ -335,8 +345,7 @@ namespace SMWEngine.Source
 
             if (player.isRunning && !player.isGrounded)
             {
-                yMod += player.position.Y - player.positionLast.Y;
-                Console.WriteLine("WTF");
+                yMod += (player.position.Y - player.positionLast.Y);
             }
             else if (yMod < player.position.Y)
             {
@@ -346,7 +355,7 @@ namespace SMWEngine.Source
             {
                 if (yMod > yFloor)
                 {
-                    yMod -= 4;
+                    yMod -= 4 * (elapsed * SMW.multiplyFPS);
                     if (yMod < yFloor)
                         yMod = yFloor;
                 }
@@ -435,6 +444,7 @@ namespace SMWEngine.Source
         public void DrawHUD()
         {
             hud.Draw();
+            catText.DrawTextUpper(8, 8, "CSHARP MARIO CLONE#" + ((int) (1f / SMW.elapsed)).ToString() + " FPS", 0.8f);
         }
     }
 }
